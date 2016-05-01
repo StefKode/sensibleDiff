@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     b = 1; // this should also be ignored (huh)
     b = 2;
     for (int k=0 /* ahallo */; k<b /* this #4 is another one */; k+=1) { /*
-                                                                            weired comment
+                                                                            weird comment
                                                                             */ c++;
         a++;
     }
