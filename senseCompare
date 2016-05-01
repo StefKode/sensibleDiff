@@ -1,0 +1,47 @@
+#!/bin/bash
+
+dir1="$1"
+shift
+dir2="$1"
+
+if [ ! -d "$dir1" ]; then
+    echo "$dir1 not found"
+    exit 1
+fi
+if [ ! -d "$dir2" ]; then
+    echo "$dir2 not found"
+    exit 1
+fi
+
+if [ -d trans ]; then
+    echo "Overwrite existing dir: $trans? (Enter or Ctrl-C)"
+    read a
+fi
+
+###################################################################
+echo "Transform files to ignore comments"
+mkdir -p trans
+rm -rf trans/*
+echo "> transform: $dir1"
+c=0
+find "$dir1" | grep -e '\.c$' -e '\.cpp$' -e '\.h$' | while read line;
+do
+    echo ">> [$c] $line"
+    let c++
+    tools/transformFile.sh $line trans
+done
+echo "> transform: $dir2"
+c=0
+find "$dir2" | grep -e '\.c$' -e '\.cpp$' -e '\.h$' | while read line;
+do
+    echo ">> [$c] $line"
+    let c++
+    tools/transformFile.sh $line trans
+done
+
+echo "Diff the tree"
+cd trans
+diff -ur "$dir1" "$dir2" > diff.diff
+echo "Convert to HTML"
+python ../tools/diff2html.py -i  diff.diff -o diff_$(date +%Y-%m-%d_%H:%M:%S_$USER).html
+echo "done"
