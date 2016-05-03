@@ -18,6 +18,8 @@ if [ -d trans ]; then
     read a
 fi
 
+TOOLS="$(dirname $0)/tools"
+
 ###################################################################
 echo "Transform files to ignore comments"
 mkdir -p trans
@@ -28,7 +30,7 @@ find "$dir1" | grep -e '\.c$' -e '\.cpp$' -e '\.h$' | while read line;
 do
     echo ">> [$c] $line"
     let c++
-    tools/transformFile.sh $line trans
+    $TOOLS/transformFile.sh $line trans
 done
 echo "> transform: $dir2"
 c=0
@@ -36,12 +38,13 @@ find "$dir2" | grep -e '\.c$' -e '\.cpp$' -e '\.h$' | while read line;
 do
     echo ">> [$c] $line"
     let c++
-    tools/transformFile.sh $line trans
+    $TOOLS/transformFile.sh $line trans
 done
 
+TSN="$(date +%Y-%m-%d_%H%M%S)_$USER"
 echo "Diff the tree"
-cd trans
-diff -ur "$dir1" "$dir2" > diff.diff
+diff -w -B -u -r "$dir1" "$dir2" > trans/diff_$TSN.diff.utf8
+iconv --from-code UTF-8 --to-code US-ASCII -c trans/diff_$TSN.diff.utf8 > trans/diff_$TSN.diff
 echo "Convert to HTML"
-python ../tools/diff2html.py -i  diff.diff -o diff_$(date +%Y-%m-%d_%H:%M:%S_$USER).html
+python $TOOLS/diff2html.py -i trans/diff_$TSN.diff -o trans/diff_$TSN.html
 echo "done"
